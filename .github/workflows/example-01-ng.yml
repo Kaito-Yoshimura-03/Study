@@ -1,0 +1,59 @@
+name: Example-01-NG
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        type: choice
+        default: 'Taro'
+        options:
+          - Taro
+          - Ziro
+          - Saburo
+          - Hanako
+
+jobs:
+  example-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: example-action
+        run: |
+          sed -i 's/<name>/${{ inputs.name }}/' ./knowledge01/resource/testtext.txt
+
+      - name: post-output
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const test = fs.readFileSync('./knowledge01/resource/testtext.txt', 'utf8').toString();
+            let output;
+
+            output = `
+              <details>
+              <summary>example action 結果</summary>
+
+              \`\`\`
+              ${test}
+              \`\`\`
+
+              </details>
+            `;
+
+            const body = `
+              ## example action 結果
+
+              ${output}
+
+              *Workflow called by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            })
