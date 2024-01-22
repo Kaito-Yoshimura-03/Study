@@ -22,6 +22,7 @@ jobs:
       - name: example-action
         run: |
           sed -i 's/<name>/${{ inputs.name }}/' ./knowledge01/resource/testtext.txt
+          wc -c < ./knowledge01/resource/testtext.txt
 
       - name: post-output
         uses: actions/github-script@v6
