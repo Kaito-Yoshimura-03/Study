@@ -1,0 +1,48 @@
+name: change-task-count
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: string
+      service-group:
+        description: 'Target ECS Services'
+        required: true
+        type: string
+      mode:
+        description: 'Target mode of change task count'
+        required: true
+        type: stringF
+
+jobs:
+  change_task_count:
+    name: change task count
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: install yq
+        run: |
+          wget https://github.com/mikefarah/yq/releases/download/v4.34.1/yq_linux_amd64 -O /usr/local/bin/yq
+          chmod +x /usr/local/bin/yq
+      - name: AWS OIDC Role
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.ACCOUNT_ID }}:role/github-actions-role
+          aws-region: "ap-northeast-1"
+          role-session-name: github-actions-manual
+
+      - name: get variables from variables/change-task-count
+        run: |
+          NUM=$(yq ".${{ inputs.service-group }} | length" ./.github/variables/change-task-count/ecs-${{ inputs.mode }}.yml)
+          for i in $(seq 0 $(($NUM-1))); do
+            SERVICE_NAME=$(yq ".${{ inputs.service-group }}[$i].SERVICE_NAME" ./.github/variables/change-task-count/ecs-${{ inputs.mode }}.yml)
+            TASK_COUNT=$(yq ".${{ inputs.service-group }}[$i].TASK_COUNT" ./.github/variables/change-task-count/ecs-${{ inputs.mode }}.yml)
+            aws ecs update-service --cluster "test-ecs" --service $SERVICE_NAME --desired-count $TASK_COUNT
+          done

@@ -1,0 +1,14 @@
+GROUP1:
+  - SERVICE_NAME: test-ecs-service1
+    TASK_COUNT: 0
+  - SERVICE_NAME: test-ecs-service2
+    TASK_COUNT: 0
+  - SERVICE_NAME: test-ecs-service3
+    TASK_COUNT: 0
+  - SERVICE_NAME: test-ecs-service4
+    TASK_COUNT: 0
+GROUP2:
+  - SERVICE_NAME: test-ecs-service5
+    TASK_COUNT: 0
+  - SERVICE_NAME: test-ecs-service6
+    TASK_COUNT: 0

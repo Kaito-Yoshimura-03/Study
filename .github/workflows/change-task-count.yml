@@ -1,0 +1,31 @@
+name: change-task-count-manual
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        type: choice
+        options:
+          - dev
+          - stg
+      service-group:
+        descriptoin: 'Target ECS Services'
+        type: choice
+        options:
+          - GROUP1
+          - GROUP2
+      mode:
+        description: 'Target mode of change task count'
+        type: choice
+        options:
+          - start
+          - stop
+
+jobs:
+  change_task_count:
+    name: change task count
+    uses: ./.github/workflows/change-task-count-reusable.yml
+    with:
+      environment: ${{ inputs.environment }}
+      mode: ${{ inputs.mode }}
+      service-group: ${{ inputs.service-group }}
